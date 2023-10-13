@@ -1,0 +1,122 @@
+HISTORIAL DEL BASH
+shopt -s histappend
+export PROMPT_COMMAND="history -a; history -c; history -r; $PROMPT_COMMAND"
+(ponerlo en el .bashrc)
+
+COPIAR ARCHIVOS DE LA MÁQUINA VIRTUAL
+scp unai@11.22.33.44:/home/unai/mifichero.tar.gz /miDisco
+
+COMPRIMIR
+tar -cvf <nombre archivo> <archivo>
+
+DESCOMPRIMIR
+tar -xvf <nombre archivo>
+
+TEMA1
+
+ls /etc -tlr --group-directories-first | tail -n 5 (listar los archivos mas nuevos al final y tomar 5)
+
+cut -d: -f1 /etc/passwd (listar usuarios) / cut -d: -f1 /etc/passwd | wc -l (número de usuarios)
+
+cut -d: -f7 /etc/passwd (bash de cada usuario)
+
+last <nombre> (ver la última conexión)
+
+tar -cvf <nombre.archivo.tar.gz> <archivos> (comprimir)
+
+tar -xvf <archivo.tar> --directory=<directorio>
+
+find -user root -ls (encontrar los archivos de root y listarlos de manera extendida)
+
+tail -n30 /var/log/syslog (líneas de syslog)
+
+man ls | awk 'NR==3' (extraer una determinada línea de un archivo)
+
+type -t <comando> (dice si es un comando o no)
+
+$ len = `expr length" $ string "` (longitud de una cadena en bash)
+
+echo "mensaje" >> archivo.txt (escribir mensaje al final del fichero txt ya creado)
+
+Cambiar extensiones y nombres de los archivos -> mv carpeta/archivo.txt carpeta/arc.t
+
+cat /etc/passwd | sort -n -k 3 -t : (Ordenar el archivo passwd por número del uid)
+
+sed -i 's/NOMBRE/Juan/g' prueba.txt (Sustituir NOMBRE por Juan en el archivo prueba.txt)
+
+
+TEMA2
+
+lsblk -e7 (listar discos y particiones)
+
+cfdisk (crear particiones)
+
+sudo mkfs.ext4 /dev/sdb1 (crear el sistema de ficheros ext4)
+
+sudo mount /dev/sdb1 /discoExt4/ (Montar el disco en /discoExt4)
+
+pruebas de rendimiento con fio -> sudo fio --randrepeat=1 --ioengine=libaio --direct=1 --gtod_reduce=1 
+--name=test --bs=4k --iodepth=64 --readwrite=randrw --rwmixread=75 --size=512M --filename=/discoExt4/archivo
+
+El tamaño del bloque es crucial, cambia la velocidad de escritura y lectura.
+
+pvcreate <partición> (volumen físico) -> vgcreate <nombre> <volúmenes> (grupo de volumenes físicos) 
+-> lvcreate <nombre del grupo de volumenes> -l <tamaño> -n <nombre> (crear un volumen lógico)
+
+mkfs.ext4 /dev/<nombre vol fisico>/<nombre volumen lógico>
+
+vgextend <nombre grupo físico> <partición> (añadir volumen físico al lógico)
+
+lvextend -L +2.8G /dev/volFis/volLog (aumentar el tamaño del volumen lógico)
+
+lvremove /dev/vg-name/lv-name (eliminar el volumen lógico)
+
+mdadm --create /dev/md0 --verbose --level=5 --raid-devices=3 /dev/sdb1 /dev/sdb2 /dev/sdc1 
+(crear un raid 5 con 3 particiones)
+
+mdadm /dev/md0 -f /dev/sdc1 (Producir un error en el disco)
+
+Para solucionarlo introducir una nueva partición en el raid:
+sudo mdadm /dev/md0 -a /dev/sdc3
+
+cat /proc/mdstat -> ver reconstrucción
+
+TEMA3
+
+ps -aux | wc -l (número de procesos del sistema)
+
+ps -aux | cut -d " " -f1 | grep root | wc -l (número de procesos de root)
+
+stress-ng -c 1 -t 20s (stress-ng para 1 core y 20s)
+
+kill -STOP <pid> (pausar ejecución de un proceso)
+
+kill -18 <pid> (reanudar ejecución de un proceso)
+
+https://www.zeppelinux.es/matar-y-reiniciar-procesos-con-los-comandos-kill-killall-y-pkill-en-linux/#an_n313
+https://www-uxsup.csx.cam.ac.uk/courses/moved.Building/signals.pdf
+(señales y rollos)
+
+renice 19 <pid> (cambiar la prioridad del proceso al mínimo) (Prioridad de 0-39)
+
+Multipathd (prioridad rt) --> Se encarga de configurar el sistema operativo para que sea capaz de acceder
+a los discos de cabina por diferentes caminos
+
+ulimit -t 300 (limitar el uso de la cpu durante 5 minutos)
+
+https://crontab.guru/#*_*_*_*_*
+
+* * * * * date >> /tmp/date.log
+0 17 1-5 * * rm -rf /tmp
+(Ficheros crontab)
+
+crontab <nombre fichero>
+
+logger -p "<Mensaje>" (-p para prioridad)
+
+https://unix.stackexchange.com/questions/115839/change-sshd-logging-file-location-on-centos (cambiar logs de sshd)
+
+https://blog.carreralinux.com.ar/2017/01/ejemplos-de-logrotate-logs-linux/ (rotacion de logs)
+
+https://stackoverflow.com/questions/69238693/redirect-output-from-mosquitto-sub-to-txt-file-and-overwrite-with-each-update
+
